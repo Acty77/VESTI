@@ -13,12 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MeetingRoom
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
@@ -34,58 +33,45 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import com.yoshua.vesti.repository.models.Product
-import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.repository.models.Probador
+import com.yoshua.vesti.viewmodels.ProbadorViewModel
 
 @Composable
-fun ProductListScreen(
-    viewModel: ProductViewModel,
+fun ProbadorListScreen(
+    viewModel: ProbadorViewModel,
     onAdd: () -> Unit,
     onEdit: (Int) -> Unit
 ) {
-    val products by viewModel.products.collectAsStateWithLifecycle()
-    var toDelete by remember { mutableStateOf<Product?>(null) }
+    val probadores by viewModel.probadores.collectAsStateWithLifecycle()
+    var toDelete by remember { mutableStateOf<Probador?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (products.isEmpty()) {
-            Text("No hay productos. Presiona + para agregar.", modifier = Modifier.align(Alignment.Center))
+        if (probadores.isEmpty()) {
+            Text("No hay probadores. Presiona + para agregar.", modifier = Modifier.align(Alignment.Center))
         } else {
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(products, key = { it.id }) { product ->
+                items(probadores, key = { it.id }) { probador ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (product.imageUri != null) {
-                                AsyncImage(
-                                    model = product.imageUri,
-                                    contentDescription = product.name,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp))
-                                )
-                            } else {
-                                Icon(Icons.Default.Inventory2, contentDescription = null, modifier = Modifier.size(56.dp))
-                            }
+                            Icon(Icons.Outlined.MeetingRoom, contentDescription = null, modifier = Modifier.size(40.dp))
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(product.name, style = MaterialTheme.typography.titleMedium)
-                                Text("Precio: \$${"%,.0f".format(product.price)}")
-                                Text("Stock: ${product.stock}")
+                                Text("Probador %02d".format(probador.numero), style = MaterialTheme.typography.titleMedium)
+                                Text(probador.ubicacion, style = MaterialTheme.typography.bodyMedium)
                             }
-                            IconButton(onClick = { onEdit(product.id) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Editar")
+                            IconButton(onClick = { onEdit(probador.id) }) {
+                                Icon(Icons.Outlined.Edit, contentDescription = "Editar")
                             }
-                            IconButton(onClick = { toDelete = product }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+                            IconButton(onClick = { toDelete = probador }) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -97,18 +83,18 @@ fun ProductListScreen(
             onClick = onAdd,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Agregar producto")
+            Icon(Icons.Outlined.Add, contentDescription = "Agregar probador")
         }
     }
 
-    toDelete?.let { product ->
+    toDelete?.let { probador ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
-            title = { Text("Eliminar producto") },
-            text = { Text("¿Eliminar \"${product.name}\"?") },
+            title = { Text("Eliminar probador") },
+            text = { Text("¿Eliminar el probador ${"%02d".format(probador.numero)}?") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteProduct(product)
+                    viewModel.deleteProbador(probador)
                     toDelete = null
                 }) { Text("Eliminar") }
             },

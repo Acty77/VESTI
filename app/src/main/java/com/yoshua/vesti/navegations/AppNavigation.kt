@@ -43,13 +43,13 @@ import com.yoshua.vesti.view.utils.navPopExitTransition
 import com.yoshua.vesti.view.ui.CameraScreen
 import com.yoshua.vesti.view.ui.HomeScreen
 import com.yoshua.vesti.view.ui.LoginScreen
-import com.yoshua.vesti.view.ui.ProductFormScreen
-import com.yoshua.vesti.view.ui.ProductListScreen
+import com.yoshua.vesti.view.ui.ProbadorFormScreen
+import com.yoshua.vesti.view.ui.ProbadorListScreen
 import com.yoshua.vesti.view.ui.TipoUsuarioScreen
 import com.yoshua.vesti.view.ui.UserFormScreen
 import com.yoshua.vesti.view.ui.UserListScreen
 import com.yoshua.vesti.viewmodels.LoginViewModel
-import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
 import kotlinx.coroutines.launch
@@ -63,14 +63,14 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 object Routes {
     const val LOGIN = "login"
     const val HOME = "home"
-    const val PRODUCTS = "products"
-    const val PRODUCT_FORM = "product_form?id={id}"
+    const val PROBADORES = "probadores"
+    const val PROBADOR_FORM = "probador_form?id={id}"
     const val USERS = "users"
     const val USER_FORM = "user_form?id={id}"
     const val CAMERA = "camera"
     const val TIPOS = "tipos_usuario"
 
-    fun productForm(id: Int = 0) = "product_form?id=$id"
+    fun probadorForm(id: Int = 0) = "probador_form?id=$id"
     fun userForm(id: Int = 0) = "user_form?id=$id"
 }
 
@@ -79,7 +79,7 @@ data class MenuItem(val route: String, val label: String, val icon: ImageVector)
 /** Opciones del menú lateral */
 val menuItems = listOf(
     MenuItem(Routes.HOME, "Inicio", Icons.Outlined.Home),
-    MenuItem(Routes.PRODUCTS, "Productos", Icons.Outlined.ShoppingCart),
+    MenuItem(Routes.PROBADORES, "Productos", Icons.Outlined.ShoppingCart),
     MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People),
     MenuItem(Routes.TIPOS, "Tipos de usuario", Icons.Outlined.Badge),
     MenuItem(Routes.CAMERA, "Cámara", Icons.Outlined.PhotoCamera)
@@ -87,8 +87,8 @@ val menuItems = listOf(
 
 private fun titleFor(route: String?): String = when (route) {
     Routes.HOME -> "Inicio"
-    Routes.PRODUCTS -> "Productos"
-    Routes.PRODUCT_FORM -> "Producto"
+    Routes.PROBADORES -> "Productos"
+    Routes.PROBADOR_FORM -> "Producto"
     Routes.USERS -> "Usuarios"
     Routes.USER_FORM -> "Usuario"
     Routes.CAMERA -> "Cámara"
@@ -100,7 +100,7 @@ private fun titleFor(route: String?): String = when (route) {
 @Composable
 fun AppNavigation(
     loginViewModel: LoginViewModel,
-    productViewModel: ProductViewModel,
+    probadorViewModel: ProbadorViewModel,
     userViewModel: UserViewModel,
     tipoUsuarioViewModel: TipoUsuarioViewModel
 ) {
@@ -196,7 +196,7 @@ fun AppNavigation(
                 navController = navController,
                 modifier = Modifier.padding(innerPadding),
                 loginViewModel = loginViewModel,
-                productViewModel = productViewModel,
+                probadorViewModel = probadorViewModel,
                 userViewModel = userViewModel,
                 tipoUsuarioViewModel = tipoUsuarioViewModel,
                 currentUserId = loginState.loggedUser?.id,
@@ -212,7 +212,7 @@ private fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier,
     loginViewModel: LoginViewModel,
-    productViewModel: ProductViewModel,
+    probadorViewModel: ProbadorViewModel,
     userViewModel: UserViewModel,
     tipoUsuarioViewModel: TipoUsuarioViewModel,
     currentUserId: Int?,
@@ -241,17 +241,17 @@ private fun AppNavHost(
         composable(Routes.HOME) {
             HomeScreen(userName = currentUserName, onNavigate = onNavigateTopLevel)
         }
-        composable(Routes.PRODUCTS) {
-            ProductListScreen(
-                viewModel = productViewModel,
-                onAdd = { navController.navigate(Routes.productForm()) },
-                onEdit = { id -> navController.navigate(Routes.productForm(id)) }
+        composable(Routes.PROBADORES) {
+            ProbadorListScreen(
+                viewModel = probadorViewModel,
+                onAdd = { navController.navigate(Routes.probadorForm()) },
+                onEdit = { id -> navController.navigate(Routes.probadorForm(id)) }
             )
         }
-        composable(Routes.PRODUCT_FORM, arguments = idArg) { entry ->
-            ProductFormScreen(
-                viewModel = productViewModel,
-                productId = entry.arguments?.getInt("id") ?: 0,
+        composable(Routes.PROBADOR_FORM, arguments = idArg) { entry ->
+            ProbadorFormScreen(
+                viewModel = probadorViewModel,
+                probadorId = entry.arguments?.getInt("id") ?: 0,
                 onDone = { navController.popBackStack() }
             )
         }

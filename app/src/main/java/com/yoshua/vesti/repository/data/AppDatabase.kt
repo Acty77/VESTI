@@ -5,17 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.yoshua.vesti.repository.models.Product
+import com.yoshua.vesti.repository.models.Probador
 import com.yoshua.vesti.repository.models.TipoUsuario
 import com.yoshua.vesti.repository.models.User
 
 @Database(
-    entities = [Product::class, User::class, TipoUsuario::class],
-    version = 2, // v2: se agrega tipo_usuarios y FK en users
+    entities = [Probador::class, User::class, TipoUsuario::class],
+    version = 4, // v2: se agrega tipo_usuarios y FK en users
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun productDao(): ProductDao
+    abstract fun probadorDao(): ProbadorDao
     abstract fun userDao(): UserDao
     abstract fun tipoUsuarioDao(): TipoUsuarioDao
 

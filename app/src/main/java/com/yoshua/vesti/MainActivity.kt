@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import com.yoshua.vesti.navegations.AppNavigation
 import com.yoshua.vesti.view.theme.AppTheme
 import com.yoshua.vesti.viewmodels.LoginViewModel
-import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
 
@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
 
     // ViewModels (capa VM de MVVM) con alcance de la Activity
     private val loginViewModel: LoginViewModel by viewModels()
-    private val productViewModel: ProductViewModel by viewModels()
+    private val probadorViewModel: ProbadorViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private val tipoUsuarioViewModel: TipoUsuarioViewModel by viewModels()
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                AppNavigation(loginViewModel, productViewModel, userViewModel, tipoUsuarioViewModel)
+                AppNavigation(loginViewModel, probadorViewModel, userViewModel, tipoUsuarioViewModel)
             }
         }
     }

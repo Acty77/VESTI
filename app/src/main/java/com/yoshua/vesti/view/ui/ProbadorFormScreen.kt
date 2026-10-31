@@ -1,8 +1,6 @@
 package com.yoshua.vesti.view.ui
 
-import com.yoshua.vesti.view.utils.CameraCapture
 import com.yoshua.vesti.view.utils.AnimacionEntradaFormulario
-import com.yoshua.vesti.view.utils.PhotoBox
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,43 +24,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.ProbadorViewModel
 
 @Composable
-fun ProductFormScreen(viewModel: ProductViewModel, productId: Int, onDone: () -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var price by rememberSaveable { mutableStateOf("") }
-    var stock by rememberSaveable { mutableStateOf("") }
-    var imageUri by rememberSaveable { mutableStateOf<String?>(null) }
+fun ProbadorFormScreen(viewModel: ProbadorViewModel, probadorId: Int, onDone: () -> Unit) {
+    var numero by rememberSaveable { mutableStateOf("") }
+    var ubicacion by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    var showCamera by rememberSaveable { mutableStateOf(false) }
     var loaded by rememberSaveable { mutableStateOf(false) }
     var visible by rememberSaveable { mutableStateOf(false) }
 
-    // Carga el producto a editar mediante una corrutina (función suspend del ViewModel)
-    LaunchedEffect(productId) {
-        if (productId > 0 && !loaded) {
-            viewModel.getProduct(productId)?.let {
-                name = it.name
-                price = it.price.toString()
-                stock = it.stock.toString()
-                imageUri = it.imageUri
+    // Carga el probador a editar mediante una corrutina (función suspend del ViewModel)
+    LaunchedEffect(probadorId) {
+        if (probadorId > 0 && !loaded) {
+            viewModel.getProbador(probadorId)?.let {
+                numero = it.numero.toString()
+                ubicacion = it.ubicacion
             }
         }
         loaded = true
         visible = true
-    }
-
-    if (showCamera) {
-        CameraCapture(
-            carpeta = "productos",
-            onImageCaptured = { uri ->
-                imageUri = uri.toString()
-                showCamera = false
-            },
-            onClose = { showCamera = false }
-        )
-        return
     }
 
     // ANIMACIÓN 1 (view/utils/Animations.kt): fade + deslizamiento vertical
@@ -76,27 +57,19 @@ fun ProductFormScreen(viewModel: ProductViewModel, productId: Int, onDone: () ->
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                if (productId > 0) "Editar Producto" else "Nuevo Producto",
+                if (probadorId > 0) "Editar Probador" else "Nuevo Probador",
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            PhotoBox(imageUri = imageUri, circle = false, onTakePhoto = { showCamera = true })
-
             OutlinedTextField(
-                value = name, onValueChange = { name = it },
-                label = { Text("Nombre") }, singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = price, onValueChange = { price = it },
-                label = { Text("Precio") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = stock, onValueChange = { stock = it },
-                label = { Text("Stock") }, singleLine = true,
+                value = numero, onValueChange = { numero = it },
+                label = { Text("Número") }, singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = ubicacion, onValueChange = { ubicacion = it },
+                label = { Text("Ubicación") }, singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -104,20 +77,23 @@ fun ProductFormScreen(viewModel: ProductViewModel, productId: Int, onDone: () ->
 
             Button(
                 onClick = {
-                    val p = price.replace(',', '.').toDoubleOrNull()
-                    val s = stock.toIntOrNull()
+                    val n = numero.toIntOrNull()
                     when {
-                        name.isBlank() -> error = "El nombre es obligatorio"
-                        p == null || p < 0 -> error = "Precio inválido"
-                        s == null || s < 0 -> error = "Stock inválido"
+                        n == null || n <= 0 -> error = "Número inválido"
+                        ubicacion.isBlank() -> error = "La ubicación es obligatoria"
                         else -> {
-                            viewModel.saveProduct(productId, name.trim(), p, s, imageUri)
-                            onDone()
+                            viewModel.saveProbador(probadorId, n, ubicacion.trim()) { guardado ->
+                                if (guardado) {
+                                    onDone()
+                                } else {
+                                    error = "Ya existe un probador con ese número"
+                                }
+                            }
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Guardar Producto") }
+            ) { Text("Guardar Probador") }
 
             OutlinedButton(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text("Cancelar") }
         }

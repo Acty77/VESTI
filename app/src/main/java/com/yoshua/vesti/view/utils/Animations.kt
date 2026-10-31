@@ -22,7 +22,7 @@ import androidx.navigation.NavBackStackEntry
 
 /*
  * Animaciones de la app, reunidas en un solo lugar.
- *   ANIMACIÓN 1: AnimacionEntradaFormulario  -> ProductFormScreen, UserFormScreen
+ *   ANIMACIÓN 1: AnimacionEntradaFormulario  -> ProbadorFormScreen, UserFormScreen
  *   ANIMACIÓN 2: Modifier.pulsoYRotacion()   -> logo de LoginScreen
  *   ANIMACIÓN 3: transiciones de navegación  -> NavHost en AppNavigation
  */
