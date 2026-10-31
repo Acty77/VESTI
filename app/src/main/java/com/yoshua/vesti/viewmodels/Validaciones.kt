@@ -1,4 +1,4 @@
-package com.example.app.viewmodels
+package com.yoshua.vesti.viewmodels
 
 /**
  * Reglas de validación compartidas por los ViewModels.

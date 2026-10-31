@@ -1,10 +1,10 @@
-package com.example.app.viewmodels
+package com.yoshua.vesti.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app.repository.data.AppDatabase
-import com.example.app.repository.models.User
+import com.yoshua.vesti.repository.data.AppDatabase
+import com.yoshua.vesti.repository.models.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

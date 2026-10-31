@@ -1,4 +1,4 @@
-package com.example.app.repository.data
+package com.yoshua.vesti.repository.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.app.repository.models.TipoUsuario
+import com.yoshua.vesti.repository.models.TipoUsuario
 import kotlinx.coroutines.flow.Flow
 
 @Dao

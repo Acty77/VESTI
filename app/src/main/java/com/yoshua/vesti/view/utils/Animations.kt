@@ -1,4 +1,4 @@
-package com.example.app.view.utils
+package com.yoshua.vesti.view.utils
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility

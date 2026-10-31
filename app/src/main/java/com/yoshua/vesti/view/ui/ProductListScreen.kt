@@ -1,4 +1,4 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,8 +39,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.app.repository.models.Product
-import com.example.app.viewmodels.ProductViewModel
+import com.yoshua.vesti.repository.models.Product
+import com.yoshua.vesti.viewmodels.ProductViewModel
 
 @Composable
 fun ProductListScreen(

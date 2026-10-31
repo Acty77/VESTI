@@ -1,4 +1,4 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,9 +39,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.app.repository.models.User
-import com.example.app.viewmodels.TipoUsuarioViewModel
-import com.example.app.viewmodels.UserViewModel
+import com.yoshua.vesti.repository.models.User
+import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
+import com.yoshua.vesti.viewmodels.UserViewModel
 
 @Composable
 fun UserListScreen(

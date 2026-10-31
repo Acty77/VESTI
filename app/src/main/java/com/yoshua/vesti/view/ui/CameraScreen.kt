@@ -1,6 +1,6 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
-import com.example.app.view.utils.CameraCapture
+import com.yoshua.vesti.view.utils.CameraCapture
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

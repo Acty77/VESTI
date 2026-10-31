@@ -1,4 +1,4 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,8 +28,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.app.view.utils.pulsoYRotacion
-import com.example.app.viewmodels.LoginViewModel
+import com.yoshua.vesti.view.utils.pulsoYRotacion
+import com.yoshua.vesti.viewmodels.LoginViewModel
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
@@ -44,18 +49,33 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = Icons.Default.PhotoCamera,
-            contentDescription = "Logo",
-            tint = MaterialTheme.colorScheme.primary,
-            // ANIMACIÓN 2 (view/utils/Animations.kt): pulso + rotación del logo
+        // Logo: ícono de perchero dentro de un círculo azul marino
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(96.dp)
+                .size(112.dp)
+                // ANIMACIÓN 2 (view/utils/Animations.kt): pulso + rotación del logo
                 .pulsoYRotacion()
-        )
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Checkroom,
+                contentDescription = "Logo de VESTI",
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(56.dp)
+            )
+        }
         Spacer(Modifier.height(16.dp))
-        Text("Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "VESTI",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text("Gestión de probadores", style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(24.dp))
+        Text("Iniciar sesión", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = state.email,

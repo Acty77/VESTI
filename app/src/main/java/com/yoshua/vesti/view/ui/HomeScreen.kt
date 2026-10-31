@@ -1,4 +1,4 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.app.navegations.Routes
-import com.example.app.navegations.menuItems
+import com.yoshua.vesti.navegations.Routes
+import com.yoshua.vesti.navegations.menuItems
 
 @Composable
 fun HomeScreen(userName: String, onNavigate: (String) -> Unit) {

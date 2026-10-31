@@ -1,8 +1,8 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
-import com.example.app.view.utils.CameraCapture
-import com.example.app.view.utils.AnimacionEntradaFormulario
-import com.example.app.view.utils.PhotoBox
+import com.yoshua.vesti.view.utils.CameraCapture
+import com.yoshua.vesti.view.utils.AnimacionEntradaFormulario
+import com.yoshua.vesti.view.utils.PhotoBox
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.app.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.ProductViewModel
 
 @Composable
 fun ProductFormScreen(viewModel: ProductViewModel, productId: Int, onDone: () -> Unit) {

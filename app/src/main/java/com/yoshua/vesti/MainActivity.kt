@@ -1,16 +1,16 @@
-package com.example.app
+package com.yoshua.vesti
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import com.example.app.navegations.AppNavigation
-import com.example.app.view.theme.AppTheme
-import com.example.app.viewmodels.LoginViewModel
-import com.example.app.viewmodels.ProductViewModel
-import com.example.app.viewmodels.TipoUsuarioViewModel
-import com.example.app.viewmodels.UserViewModel
+import com.yoshua.vesti.navegations.AppNavigation
+import com.yoshua.vesti.view.theme.AppTheme
+import com.yoshua.vesti.viewmodels.LoginViewModel
+import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
+import com.yoshua.vesti.viewmodels.UserViewModel
 
 class MainActivity : ComponentActivity() {
 

@@ -1,4 +1,4 @@
-package com.example.app.navegations
+package com.yoshua.vesti.navegations
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -41,23 +36,28 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.app.view.utils.navEnterTransition
-import com.example.app.view.utils.navExitTransition
-import com.example.app.view.utils.navPopEnterTransition
-import com.example.app.view.utils.navPopExitTransition
-import com.example.app.view.ui.CameraScreen
-import com.example.app.view.ui.HomeScreen
-import com.example.app.view.ui.LoginScreen
-import com.example.app.view.ui.ProductFormScreen
-import com.example.app.view.ui.ProductListScreen
-import com.example.app.view.ui.TipoUsuarioScreen
-import com.example.app.view.ui.UserFormScreen
-import com.example.app.view.ui.UserListScreen
-import com.example.app.viewmodels.LoginViewModel
-import com.example.app.viewmodels.ProductViewModel
-import com.example.app.viewmodels.TipoUsuarioViewModel
-import com.example.app.viewmodels.UserViewModel
+import com.yoshua.vesti.view.utils.navEnterTransition
+import com.yoshua.vesti.view.utils.navExitTransition
+import com.yoshua.vesti.view.utils.navPopEnterTransition
+import com.yoshua.vesti.view.utils.navPopExitTransition
+import com.yoshua.vesti.view.ui.CameraScreen
+import com.yoshua.vesti.view.ui.HomeScreen
+import com.yoshua.vesti.view.ui.LoginScreen
+import com.yoshua.vesti.view.ui.ProductFormScreen
+import com.yoshua.vesti.view.ui.ProductListScreen
+import com.yoshua.vesti.view.ui.TipoUsuarioScreen
+import com.yoshua.vesti.view.ui.UserFormScreen
+import com.yoshua.vesti.view.ui.UserListScreen
+import com.yoshua.vesti.viewmodels.LoginViewModel
+import com.yoshua.vesti.viewmodels.ProductViewModel
+import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
+import com.yoshua.vesti.viewmodels.UserViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.ShoppingCart
 
 /** Rutas de navegación */
 object Routes {
@@ -78,11 +78,11 @@ data class MenuItem(val route: String, val label: String, val icon: ImageVector)
 
 /** Opciones del menú lateral */
 val menuItems = listOf(
-    MenuItem(Routes.HOME, "Inicio", Icons.Default.Home),
-    MenuItem(Routes.PRODUCTS, "Productos", Icons.Default.ShoppingCart),
-    MenuItem(Routes.USERS, "Usuarios", Icons.Default.People),
-    MenuItem(Routes.TIPOS, "Tipos de usuario", Icons.Default.Badge),
-    MenuItem(Routes.CAMERA, "Cámara", Icons.Default.PhotoCamera)
+    MenuItem(Routes.HOME, "Inicio", Icons.Outlined.Home),
+    MenuItem(Routes.PRODUCTS, "Productos", Icons.Outlined.ShoppingCart),
+    MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People),
+    MenuItem(Routes.TIPOS, "Tipos de usuario", Icons.Outlined.Badge),
+    MenuItem(Routes.CAMERA, "Cámara", Icons.Outlined.PhotoCamera)
 )
 
 private fun titleFor(route: String?): String = when (route) {
@@ -184,7 +184,9 @@ fun AppNavigation(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     )
                 }

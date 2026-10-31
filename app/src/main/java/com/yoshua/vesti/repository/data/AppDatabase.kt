@@ -1,13 +1,13 @@
-package com.example.app.repository.data
+package com.yoshua.vesti.repository.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.app.repository.models.Product
-import com.example.app.repository.models.TipoUsuario
-import com.example.app.repository.models.User
+import com.yoshua.vesti.repository.models.Product
+import com.yoshua.vesti.repository.models.TipoUsuario
+import com.yoshua.vesti.repository.models.User
 
 @Database(
     entities = [Product::class, User::class, TipoUsuario::class],

@@ -1,8 +1,8 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
-import com.example.app.view.utils.CameraCapture
-import com.example.app.view.utils.AnimacionEntradaFormulario
-import com.example.app.view.utils.PhotoBox
+import com.yoshua.vesti.view.utils.CameraCapture
+import com.yoshua.vesti.view.utils.AnimacionEntradaFormulario
+import com.yoshua.vesti.view.utils.PhotoBox
 import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,8 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.app.viewmodels.TipoUsuarioViewModel
-import com.example.app.viewmodels.UserViewModel
+import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
+import com.yoshua.vesti.viewmodels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

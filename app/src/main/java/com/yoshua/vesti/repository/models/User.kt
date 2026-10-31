@@ -1,4 +1,4 @@
-package com.example.app.repository.models
+package com.yoshua.vesti.repository.models
 
 import androidx.room.Entity
 import androidx.room.ForeignKey

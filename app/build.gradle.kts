@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.app"
+    namespace = "com.yoshua.vesti"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.app"
+        applicationId = "com.yoshua.vesti"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

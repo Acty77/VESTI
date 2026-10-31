@@ -1,4 +1,4 @@
-package com.example.app.view.ui
+package com.yoshua.vesti.view.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,8 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.app.repository.models.TipoUsuario
-import com.example.app.viewmodels.TipoUsuarioViewModel
+import com.yoshua.vesti.repository.models.TipoUsuario
+import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 
 /** CRUD de tipos de usuario en una sola pantalla (formulario arriba, lista abajo). */
 @Composable
