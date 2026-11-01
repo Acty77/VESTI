@@ -67,4 +67,15 @@ class ProbadorViewModel(application: Application) : AndroidViewModel(application
             probadorDao.updateProbador(probadorActualizado)
         }
     }
+
+    fun toggleEnServicio(probador: Probador) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val actualizado = probador.copy(
+                enServicio = !probador.enServicio,
+                inicioMillis = null // Al sacar de servicio se libera el temporizador si estaba ocupado
+            )
+            probadorDao.updateProbador(actualizado)
+        }
+    }
+
 }

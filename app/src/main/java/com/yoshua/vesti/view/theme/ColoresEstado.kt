@@ -10,4 +10,5 @@ fun coloresDeEstado(estado: EstadoProbador): ColoresEstado = when (estado) {
     EstadoProbador.LIBRE -> ColoresEstado(fondo = Color(0xFFE6F4EA), texto = Color(0xFF1B5E20))
     EstadoProbador.OCUPADO -> ColoresEstado(fondo = Color(0xFFFFEFD6), texto = Color(0xFF8A4B00))
     EstadoProbador.EXCEDIDO -> ColoresEstado(fondo = Color(0xFFFCE4E4), texto = Color(0xFF9B1C1C))
+    EstadoProbador.FUERA_DE_SERVICIO -> ColoresEstado(fondo = Color(0xFFE7E0D8), texto = Color(0xFF4A4640))
 }

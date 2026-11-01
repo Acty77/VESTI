@@ -11,7 +11,7 @@ import com.yoshua.vesti.repository.models.User
 
 @Database(
     entities = [Probador::class, User::class, TipoUsuario::class],
-    version = 6, // v2: se agrega tipo_usuarios y FK en users
+    version = 9, // v2: se agrega tipo_usuarios y FK en users
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

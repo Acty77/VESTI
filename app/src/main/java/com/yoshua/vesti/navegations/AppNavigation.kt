@@ -248,6 +248,7 @@ private fun AppNavHost(
         composable(Routes.PROBADORES) {
             ProbadorListScreen(
                 viewModel = probadorViewModel,
+                isAdmin = isAdmin, // <-- Pasa el rol a ProbadorListScreen
                 onAdd = { navController.navigate(Routes.probadorForm()) },
                 onEdit = { id -> navController.navigate(Routes.probadorForm(id)) }
             )

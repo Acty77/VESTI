@@ -1,7 +1,7 @@
 package com.yoshua.vesti.repository.models
 
 /** Los tres estados posibles de un probador. */
-enum class EstadoProbador { LIBRE, OCUPADO, EXCEDIDO }
+enum class EstadoProbador { LIBRE, OCUPADO, EXCEDIDO, FUERA_DE_SERVICIO }
 
 /**
  * Regla central de VESTI: decide el estado según cuánto tiempo lleva ocupado el probador.
