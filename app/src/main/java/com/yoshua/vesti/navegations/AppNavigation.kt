@@ -7,6 +7,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.DoorFront
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,28 +39,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.yoshua.vesti.view.utils.navEnterTransition
-import com.yoshua.vesti.view.utils.navExitTransition
-import com.yoshua.vesti.view.utils.navPopEnterTransition
-import com.yoshua.vesti.view.utils.navPopExitTransition
-import com.yoshua.vesti.view.ui.CameraScreen
 import com.yoshua.vesti.view.ui.HomeScreen
 import com.yoshua.vesti.view.ui.LoginScreen
 import com.yoshua.vesti.view.ui.ProbadorFormScreen
 import com.yoshua.vesti.view.ui.ProbadorListScreen
-import com.yoshua.vesti.view.ui.TipoUsuarioScreen
 import com.yoshua.vesti.view.ui.UserFormScreen
 import com.yoshua.vesti.view.ui.UserListScreen
+import com.yoshua.vesti.view.utils.navEnterTransition
+import com.yoshua.vesti.view.utils.navExitTransition
+import com.yoshua.vesti.view.utils.navPopEnterTransition
+import com.yoshua.vesti.view.utils.navPopExitTransition
 import com.yoshua.vesti.viewmodels.LoginViewModel
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material.icons.outlined.ShoppingCart
 
 /** Rutas de navegación */
 object Routes {
@@ -67,8 +63,6 @@ object Routes {
     const val PROBADOR_FORM = "probador_form?id={id}"
     const val USERS = "users"
     const val USER_FORM = "user_form?id={id}"
-    const val CAMERA = "camera"
-    const val TIPOS = "tipos_usuario"
 
     fun probadorForm(id: Int = 0) = "probador_form?id=$id"
     fun userForm(id: Int = 0) = "user_form?id=$id"
@@ -79,20 +73,16 @@ data class MenuItem(val route: String, val label: String, val icon: ImageVector)
 /** Opciones del menú lateral */
 val menuItems = listOf(
     MenuItem(Routes.HOME, "Inicio", Icons.Outlined.Home),
-    MenuItem(Routes.PROBADORES, "Productos", Icons.Outlined.ShoppingCart),
-    MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People),
-    MenuItem(Routes.TIPOS, "Tipos de usuario", Icons.Outlined.Badge),
-    MenuItem(Routes.CAMERA, "Cámara", Icons.Outlined.PhotoCamera)
+    MenuItem(Routes.PROBADORES, "Probadores", Icons.Outlined.DoorFront),
+    MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People)
 )
 
 private fun titleFor(route: String?): String = when (route) {
     Routes.HOME -> "Inicio"
-    Routes.PROBADORES -> "Productos"
-    Routes.PROBADOR_FORM -> "Producto"
+    Routes.PROBADORES -> "Probadores"
+    Routes.PROBADOR_FORM -> "Probador"
     Routes.USERS -> "Usuarios"
     Routes.USER_FORM -> "Usuario"
-    Routes.CAMERA -> "Cámara"
-    Routes.TIPOS -> "Tipos de usuario"
     else -> ""
 }
 
@@ -111,8 +101,16 @@ fun AppNavigation(
     val currentRoute = backStackEntry?.destination?.route
     val loginState by loginViewModel.uiState.collectAsStateWithLifecycle()
 
+    // 1. Verificación de rol: 1 es Administrador
+    val isAdmin = loginState.loggedUser?.tipoUsuarioId == 1
+
+    // 2. Filtro correcto del menú: Si es admin ve todo, si no, se oculta 'Usuarios'
+    val visibleMenuItems = menuItems.filter { item ->
+        if (isAdmin) true else item.route != Routes.USERS
+    }
+
     val isLogin = currentRoute == null || currentRoute == Routes.LOGIN
-    val isTopLevel = menuItems.any { it.route == currentRoute }
+    val isTopLevel = visibleMenuItems.any { it.route == currentRoute }
 
     fun navigateTopLevel(route: String) {
         navController.navigate(route) {
@@ -128,17 +126,18 @@ fun AppNavigation(
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    loginState.loggedUser?.name ?: "",
+                    text = loginState.loggedUser?.name ?: "",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
                 Text(
-                    loginState.loggedUser?.email ?: "",
+                    text = loginState.loggedUser?.email ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
                 )
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                menuItems.forEach { item ->
+
+                visibleMenuItems.forEach { item ->
                     NavigationDrawerItem(
                         label = { Text(item.label) },
                         icon = { Icon(item.icon, contentDescription = null) },
@@ -201,6 +200,7 @@ fun AppNavigation(
                 tipoUsuarioViewModel = tipoUsuarioViewModel,
                 currentUserId = loginState.loggedUser?.id,
                 currentUserName = loginState.loggedUser?.name ?: "",
+                isAdmin = isAdmin, // <-- Se pasa la propiedad de Admin
                 onNavigateTopLevel = ::navigateTopLevel
             )
         }
@@ -217,11 +217,11 @@ private fun AppNavHost(
     tipoUsuarioViewModel: TipoUsuarioViewModel,
     currentUserId: Int?,
     currentUserName: String,
+    isAdmin: Boolean, // <-- Recibe el flag de Admin
     onNavigateTopLevel: (String) -> Unit
 ) {
     val idArg = listOf(navArgument("id") { type = NavType.IntType; defaultValue = 0 })
 
-    // ANIMACIÓN 3 (view/utils/Animations.kt): deslizamiento horizontal entre pantallas
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN,
@@ -239,7 +239,11 @@ private fun AppNavHost(
             }
         }
         composable(Routes.HOME) {
-            HomeScreen(userName = currentUserName, onNavigate = onNavigateTopLevel)
+            HomeScreen(
+                userName = currentUserName,
+                isAdmin = isAdmin, // <-- Pasa el rol a HomeScreen
+                onNavigate = onNavigateTopLevel
+            )
         }
         composable(Routes.PROBADORES) {
             ProbadorListScreen(
@@ -260,6 +264,7 @@ private fun AppNavHost(
                 viewModel = userViewModel,
                 tipoUsuarioViewModel = tipoUsuarioViewModel,
                 currentUserId = currentUserId,
+                isAdmin = isAdmin, // <-- Pasa el rol a UserListScreen
                 onAdd = { navController.navigate(Routes.userForm()) },
                 onEdit = { id -> navController.navigate(Routes.userForm(id)) }
             )
@@ -271,12 +276,6 @@ private fun AppNavHost(
                 userId = entry.arguments?.getInt("id") ?: 0,
                 onDone = { navController.popBackStack() }
             )
-        }
-        composable(Routes.CAMERA) {
-            CameraScreen()
-        }
-        composable(Routes.TIPOS) {
-            TipoUsuarioScreen(tipoUsuarioViewModel)
         }
     }
 }

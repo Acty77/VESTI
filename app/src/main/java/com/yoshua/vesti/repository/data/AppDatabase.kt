@@ -11,7 +11,7 @@ import com.yoshua.vesti.repository.models.User
 
 @Database(
     entities = [Probador::class, User::class, TipoUsuario::class],
-    version = 4, // v2: se agrega tipo_usuarios y FK en users
+    version = 6, // v2: se agrega tipo_usuarios y FK en users
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -46,11 +46,15 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onOpen(db)
                 db.execSQL(
                     "INSERT OR IGNORE INTO tipo_usuarios (id, tipo_usuario) VALUES " +
-                        "(1, 'Administrador'), (2, 'Agente'), (3, 'Supervisor')"
+                        "(1, 'Administrador'), (2, 'Vendedor')"
                 )
                 db.execSQL(
                     "INSERT OR IGNORE INTO users (name, email, password, profileImageUri, tipoUsuarioId) " +
                         "VALUES ('Administrador', 'admin@duoc.cl', 'admin123', NULL, 1)"
+                )
+                db.execSQL(
+                    "INSERT OR IGNORE INTO users (name, email, password, profileImageUri, tipoUsuarioId) " +
+                            "VALUES ('Juan', 'vendedor@duoc.cl', 'vendedor123', NULL, 2)"
                 )
             }
         }

@@ -8,5 +8,6 @@ import androidx.room.PrimaryKey
 data class Probador(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val numero: Int,        // número visible del probador (ej.: 3 -> "Probador 03"); no se repite
-    val ubicacion: String   // dónde está dentro de la tienda (ej.: "Vestuario mujer, pasillo 2")
+    val ubicacion: String,// dónde está dentro de la tienda (ej.: "Vestuario mujer, pasillo 2")
+    val inicioMillis: Long? = null
 )

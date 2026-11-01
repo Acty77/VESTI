@@ -51,7 +51,7 @@ fun ProbadorCard(
     val etiqueta = when (estado) {
         EstadoProbador.LIBRE -> "Libre"
         EstadoProbador.OCUPADO -> "Ocupado"
-        EstadoProbador.EXCEDIDO -> "Tiempo excedido"
+        EstadoProbador.EXCEDIDO -> "Excedido"
     }
     val iconoEstado: ImageVector = when (estado) {
         EstadoProbador.LIBRE -> Icons.Outlined.CheckCircle

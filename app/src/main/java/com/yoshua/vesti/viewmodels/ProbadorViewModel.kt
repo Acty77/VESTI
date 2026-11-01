@@ -32,8 +32,19 @@ class ProbadorViewModel(application: Application) : AndroidViewModel(application
                 if (probadorDao.contarPorNumero(numero, id) > 0) {
                     false
                 } else {
-                    val probador = Probador(id = id, numero = numero, ubicacion = ubicacion)
-                    if (id == 0) probadorDao.insertProbador(probador) else probadorDao.updateProbador(probador)
+                    if (id == 0) {
+                        // Crear nuevo probador (inicioMillis es null por defecto)
+                        val nuevoProbador = Probador(numero = numero, ubicacion = ubicacion)
+                        probadorDao.insertProbador(nuevoProbador)
+                    } else {
+                        // Actualizar existente preservando su inicioMillis activo
+                        val existente = probadorDao.getProbadorById(id)
+                        val probadorActualizado = existente?.copy(
+                            numero = numero,
+                            ubicacion = ubicacion
+                        ) ?: Probador(id = id, numero = numero, ubicacion = ubicacion)
+                        probadorDao.updateProbador(probadorActualizado)
+                    }
                     true
                 }
             }
@@ -45,6 +56,15 @@ class ProbadorViewModel(application: Application) : AndroidViewModel(application
     fun deleteProbador(probador: Probador) {
         viewModelScope.launch(Dispatchers.IO) {
             probadorDao.deleteProbador(probador)
+        }
+    }
+
+    // Cambia el estado: si está libre guarda System.currentTimeMillis(), si está ocupado/excedido lo vuelve null
+    fun toggleEstadoProbador(probador: Probador) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val nuevoInicio = if (probador.inicioMillis == null) System.currentTimeMillis() else null
+            val probadorActualizado = probador.copy(inicioMillis = nuevoInicio)
+            probadorDao.updateProbador(probadorActualizado)
         }
     }
 }
