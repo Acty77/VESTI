@@ -1,5 +1,6 @@
 package com.yoshua.vesti.view.ui
 
+// Importaciones para manejo de estados mutables que sobreviven a cambios de configuración, animaciones y diseño
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,20 +28,25 @@ import androidx.compose.ui.unit.dp
 import com.yoshua.vesti.view.utils.AnimacionEntradaFormulario
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 
+/**
+ * Formulario híbrido (Creación / Edición) de probadores.
+ * Permite registrar o actualizar número y ubicación validando duplicados en Room.
+ */
 @Composable
 fun ProbadorFormScreen(
     viewModel: ProbadorViewModel,
-    probadorId: Int,
-    onDone: () -> Unit
+    probadorId: Int, // Si es 0 -> Modo Creación. Si es > 0 -> Modo Edición.
+    onDone: () -> Unit // Callback ejecutado al completar o cancelar la operación
 ) {
+    // rememberSaveable mantiene los valores ingresados incluso si se gira la pantalla
     var numero by rememberSaveable { mutableStateOf("") }
     var ubicacion by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var loaded by rememberSaveable { mutableStateOf(false) }
     var visible by rememberSaveable { mutableStateOf(false) }
-    var isSaving by rememberSaveable { mutableStateOf(false) } // Previene doble envío
+    var isSaving by rememberSaveable { mutableStateOf(false) } // Previene múltiples clics seguidos en guardar
 
-    // Carga inicial al editar
+    // Efecto de carga inicial: Si probadorId > 0, consulta en la base de datos y rellena los campos
     LaunchedEffect(probadorId) {
         if (probadorId > 0 && !loaded) {
             viewModel.getProbador(probadorId)?.let {
@@ -49,14 +55,15 @@ fun ProbadorFormScreen(
             }
         }
         loaded = true
-        visible = true
+        visible = true // Dispara la animación visual de entrada
     }
 
+    // Envoltorio con animación personalizada de visibilidad
     AnimacionEntradaFormulario(visible = visible) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()) // Permite desplazar la pantalla si el teclado cubre los campos
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -66,14 +73,14 @@ fun ProbadorFormScreen(
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            // Campo Número con resaltado de error
+            // Campo de texto para el número del probador con filtro estricto
             OutlinedTextField(
                 value = numero,
                 onValueChange = { newValue ->
-                    // Filtra para permitir solo dígitos numéricos
+                    // Filtro de validación: Permite el ingreso exclusivo de dígitos
                     if (newValue.all { it.isDigit() }) {
                         numero = newValue
-                        error = null // Limpia error al escribir
+                        error = null // Limpia el error al modificar el valor
                     }
                 },
                 label = { Text("Número del Probador") },
@@ -83,12 +90,12 @@ fun ProbadorFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo Ubicación con resaltado de error
+            // Campo de texto para la ubicación física
             OutlinedTextField(
                 value = ubicacion,
                 onValueChange = {
                     ubicacion = it
-                    error = null // Limpia error al escribir
+                    error = null
                 },
                 label = { Text("Ubicación (ej: Sector A - Nivel 1)") },
                 singleLine = true,
@@ -96,7 +103,7 @@ fun ProbadorFormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Mensaje de error general
+            // Presentación de errores de validación de negocio
             error?.let {
                 Text(
                     text = it,
@@ -105,7 +112,7 @@ fun ProbadorFormScreen(
                 )
             }
 
-            // Botón Principal de Guardado
+            // Botón de guardado con lógica asíncrona
             Button(
                 enabled = !isSaving,
                 onClick = {
@@ -115,10 +122,11 @@ fun ProbadorFormScreen(
                         ubicacion.isBlank() -> error = "La ubicación es obligatoria"
                         else -> {
                             isSaving = true
+                            // Llamada al ViewModel que verifica unicidad en Room antes de guardar
                             viewModel.saveProbador(probadorId, n, ubicacion.trim()) { guardado ->
                                 isSaving = false
                                 if (guardado) {
-                                    onDone()
+                                    onDone() // Regresa al listado
                                 } else {
                                     error = "Ya existe un probador con ese número"
                                 }
@@ -138,6 +146,7 @@ fun ProbadorFormScreen(
                 Text("Guardar Probador")
             }
 
+            // Botón secundario para cancelar y descartar cambios
             OutlinedButton(
                 onClick = onDone,
                 enabled = !isSaving,

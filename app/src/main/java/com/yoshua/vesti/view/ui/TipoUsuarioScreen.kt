@@ -39,22 +39,27 @@ import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 /** CRUD de tipos de usuario en una sola pantalla (formulario arriba, lista abajo). */
 @Composable
 fun TipoUsuarioScreen(viewModel: TipoUsuarioViewModel) {
+    // Escucha la lista de tipos de usuarios y los mensajes de estado del ViewModel
     val tipos by viewModel.tipos.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    // Control de estado local para alternar entre modo creación (editId = 0) o edición (editId > 0)
     var editId by rememberSaveable { mutableIntStateOf(0) }
     var nombre by rememberSaveable { mutableStateOf("") }
     var toDelete by remember { mutableStateOf<TipoUsuario?>(null) }
 
+    // Limpia cualquier mensaje de error o notificación del ViewModel al salir de la pantalla
     DisposableEffect(Unit) { onDispose { viewModel.clearMessage() } }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Título dinámico
         Text(
             if (editId > 0) "Editar tipo de usuario" else "Nuevo tipo de usuario",
             style = MaterialTheme.typography.titleLarge
         )
+        // Campo de entrada limitado a la constante de longitud máxima definida en el modelo
         OutlinedTextField(
             value = nombre,
             onValueChange = {
@@ -62,23 +67,29 @@ fun TipoUsuarioScreen(viewModel: TipoUsuarioViewModel) {
                 viewModel.clearMessage()
             },
             label = { Text("Tipo de usuario") },
-            supportingText = { Text("${nombre.length}/${TipoUsuario.MAX_LARGO}") },
+            supportingText = { Text("${nombre.length}/${TipoUsuario.MAX_LARGO}") }, // Contador visual de caracteres
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+        // Muestra mensaje de error devuelto por la lógica de negocio (ej: nombre duplicado)
         message?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Botón dual: Agregar si editId == 0, Actualizar si editId > 0
             Button(onClick = {
                 viewModel.save(editId, nombre) {
                     editId = 0
                     nombre = ""
                 }
             }) { Text(if (editId > 0) "Actualizar" else "Agregar") }
+
+            // Botón adicional para salir del modo edición
             if (editId > 0) {
                 OutlinedButton(onClick = { editId = 0; nombre = "" }) { Text("Cancelar") }
             }
         }
 
+        // Listado de tipos de usuario existentes
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(tipos, key = { it.id }) { tipo ->
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -87,6 +98,7 @@ fun TipoUsuarioScreen(viewModel: TipoUsuarioViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("${tipo.id}. ${tipo.tipoUsuario}", modifier = Modifier.weight(1f))
+                        // Carga los datos del ítem seleccionado en el formulario superior
                         IconButton(onClick = { editId = tipo.id; nombre = tipo.tipoUsuario }) {
                             Icon(Icons.Default.Edit, contentDescription = "Editar")
                         }
@@ -99,6 +111,7 @@ fun TipoUsuarioScreen(viewModel: TipoUsuarioViewModel) {
         }
     }
 
+    // Modal para confirmar eliminación de tipo de usuario
     toDelete?.let { tipo ->
         AlertDialog(
             onDismissRequest = { toDelete = null },

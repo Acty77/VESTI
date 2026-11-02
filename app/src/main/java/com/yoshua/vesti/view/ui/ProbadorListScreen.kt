@@ -1,5 +1,6 @@
 package com.yoshua.vesti.view.ui
 
+// Importaciones de Compose para renderizado eficiente de listas (LazyColumn), temporizadores y alertas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,38 +40,47 @@ import com.yoshua.vesti.view.utils.ProbadorCard
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import kotlinx.coroutines.delay
 
+/**
+ * Listado principal de probadores con temporizador en tiempo real y opciones administrativas según rol.
+ */
 @Composable
 fun ProbadorListScreen(
     viewModel: ProbadorViewModel,
-    isAdmin: Boolean,
+    isAdmin: Boolean, // Controla la visibilidad de los botones de edición, eliminación y creación (+)
     onAdd: () -> Unit,
     onEdit: (Int) -> Unit
 ) {
+    // Observa en tiempo real la lista de probadores emitida desde el Flow de Room
     val probadores by viewModel.probadores.collectAsStateWithLifecycle()
     var toDelete by remember { mutableStateOf<Probador?>(null) }
 
-    // Actualiza el reloj interno cada 1 segundo para recalcular el tiempo transcurrido
+    // Reloj interno: Genera un pulso cada 1 segundo (1000ms) para provocar la recomposición de los cronómetros
     var ahoraMillis by remember { mutableStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000L)
-            ahoraMillis = System.currentTimeMillis()
+            delay(1000L) // Pausa asíncrona sin bloquear el hilo principal
+            ahoraMillis = System.currentTimeMillis() // Actualiza la variable gatillando el recalculo de tiempo
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (probadores.isEmpty()) {
+            // Estado vacío de la lista
             Text(
                 text = if (isAdmin) "No hay probadores. Presiona + para agregar." else "No hay probadores registrados.",
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
+            // LazyColumn recicla las vistas renderizando solo los elementos visibles en pantalla
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // 'key = { it.id }' optimiza el rendimiento del reciclado al asociar cada tarjeta a la PK de Room
                 items(probadores, key = { it.id }) { probador ->
+                    // Función pura de dominio que calcula el estado actual (LIBRE, OCUPADO, EXCEDIDO, FUERA_DE_SERVICIO)
                     val estado = calcularEstado(probador, ahoraMillis, umbralMinutos = 10)
+                    // Cálculo preciso en segundos transcurridos desde que inició el uso
                     val segundosEnUso = if (probador.inicioMillis != null) {
                         (ahoraMillis - probador.inicioMillis) / 1000L
                     } else 0L
@@ -82,7 +92,7 @@ fun ProbadorListScreen(
                         )
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
-                            // Integración completa con ProbadorCard
+                            // Tarjeta reusable que gestiona la UI de colores e íconos dinámicos del probador
                             ProbadorCard(
                                 numero = probador.numero,
                                 estado = estado,
@@ -92,7 +102,7 @@ fun ProbadorListScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
 
-                            // Detalles de ubicación y opciones administrativas
+                            // Pie de tarjeta con ubicación y botones restringidos para Admin
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -106,6 +116,7 @@ fun ProbadorListScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
 
+                                // Aplica RBAC: Solo el Administrador puede editar o eliminar probadores
                                 if (isAdmin) {
                                     Row {
                                         IconButton(onClick = { onEdit(probador.id) }) {
@@ -127,6 +138,7 @@ fun ProbadorListScreen(
             }
         }
 
+        // Botón flotante para agregar nuevos probadores (Exclusivo Admin)
         if (isAdmin) {
             FloatingActionButton(
                 onClick = onAdd,
@@ -139,6 +151,7 @@ fun ProbadorListScreen(
         }
     }
 
+    // Diálogo modal de confirmación antes de borrar un registro de la base de datos
     toDelete?.let { probador ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
@@ -146,7 +159,7 @@ fun ProbadorListScreen(
             text = { Text("¿Deseas eliminar el probador ${"%02d".format(probador.numero)}?") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteProbador(probador)
+                    viewModel.deleteProbador(probador) // Ejecuta la eliminación en el ViewModel
                     toDelete = null
                 }) { Text("Eliminar") }
             },
