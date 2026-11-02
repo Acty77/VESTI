@@ -1,6 +1,5 @@
 package com.yoshua.vesti.view.ui
 
-// Importaciones para manejo de estados mutables que sobreviven a cambios de configuración, animaciones y diseño
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,15 +27,11 @@ import androidx.compose.ui.unit.dp
 import com.yoshua.vesti.view.utils.AnimacionEntradaFormulario
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 
-/**
- * Formulario híbrido (Creación / Edición) de probadores.
- * Permite registrar o actualizar número y ubicación validando duplicados en Room.
- */
 @Composable
 fun ProbadorFormScreen(
     viewModel: ProbadorViewModel,
-    probadorId: Int, // Si es 0 -> Modo Creación. Si es > 0 -> Modo Edición.
-    onDone: () -> Unit // Callback ejecutado al completar o cancelar la operación
+    probadorId: Int,
+    onDone: () -> Unit
 ) {
     // rememberSaveable mantiene los valores ingresados incluso si se gira la pantalla
     var numero by rememberSaveable { mutableStateOf("") }
@@ -44,7 +39,7 @@ fun ProbadorFormScreen(
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var loaded by rememberSaveable { mutableStateOf(false) }
     var visible by rememberSaveable { mutableStateOf(false) }
-    var isSaving by rememberSaveable { mutableStateOf(false) } // Previene múltiples clics seguidos en guardar
+    var isSaving by rememberSaveable { mutableStateOf(false) }
 
     // Efecto de carga inicial: Si probadorId > 0, consulta en la base de datos y rellena los campos
     LaunchedEffect(probadorId) {

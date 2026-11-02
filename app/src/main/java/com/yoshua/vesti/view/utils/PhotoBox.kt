@@ -23,24 +23,33 @@ import coil.compose.AsyncImage
 
 /** Muestra la foto (o un botón para tomarla). Al tocar abre la cámara. */
 @Composable
-fun PhotoBox(imageUri: String?, circle: Boolean, onTakePhoto: () -> Unit) {
+fun PhotoBox(
+    imageUri: String?, // Ruta Uri de la imagen capturada (null si aún no hay foto)
+    circle: Boolean, // Flag: true para foto circular (Usuario), false para rectangular redondeada (Probadores/Productos)
+    onTakePhoto: () -> Unit // Callback ejecutado al tocar la caja para lanzar la cámara
+) {
+    // Determina la figura geométrica según el contexto de uso
     val shape = if (circle) CircleShape else RoundedCornerShape(16.dp)
+
+    // Contenedor principal de tamaño fijo (130dp) recortado con la figura seleccionada
     Box(
         modifier = Modifier
             .size(130.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onTakePhoto),
-        contentAlignment = Alignment.Center
+            .clip(shape) // Recorta los bordes visuales y la zona táctil
+            .background(MaterialTheme.colorScheme.surfaceVariant) // Color de fondo grisáceo por defecto
+            .clickable(onClick = onTakePhoto), // Detecta la interacción del usuario para tomar la foto
+        contentAlignment = Alignment.Center // Centra el ícono o el contenido internamente
     ) {
         if (imageUri != null) {
+            // Carga asíncrona de la imagen mediante Coil desde la memoria del dispositivo
             AsyncImage(
-                model = imageUri,
+                model = imageUri, // Ruta de la foto
                 contentDescription = "Foto",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Crop, // Escala la imagen para llenar el contenedor sin deformarla
                 modifier = Modifier.fillMaxSize()
             )
         } else {
+            // Estado por defecto cuando no existe fotografía tomada
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Default.PhotoCamera, contentDescription = null)
                 Text("Tomar foto", style = MaterialTheme.typography.bodySmall)

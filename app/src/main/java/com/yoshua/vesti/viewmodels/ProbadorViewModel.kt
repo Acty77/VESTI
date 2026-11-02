@@ -1,5 +1,6 @@
 package com.yoshua.vesti.viewmodels
 
+
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,32 +13,34 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 class ProbadorViewModel(application: Application) : AndroidViewModel(application) {
 
     private val probadorDao = AppDatabase.getDatabase(application).probadorDao()
 
-    // READ: lista reactiva expuesta a la vista
+    // Convierte el Flow frío retornado por Room en un StateFlow caliente mediante 'stateIn'.
+    // WhileSubscribed(5000): Mantiene el flujo activo durante 5 segundos tras perder la última vista (ej. al girar la pantalla).
     val probadores: StateFlow<List<Probador>> = probadorDao.getAllProbadores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Lectura puntual (se invoca desde una corrutina de la vista: LaunchedEffect)
+    // Obtención puntual de un probador por ID ejecutada en el hilo secundario IO
     suspend fun getProbador(id: Int): Probador? = withContext(Dispatchers.IO) {
         probadorDao.getProbadorById(id)
     }
 
-    // CREATE / UPDATE. Avisa con onResult(false) si el número ya lo usa otro probador.
+    // Crea o actualiza un probador validando que el número no esté duplicado
     fun saveProbador(id: Int, numero: Int, ubicacion: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val guardado = withContext(Dispatchers.IO) {
                 if (probadorDao.contarPorNumero(numero, id) > 0) {
-                    false
+                    false // Retorna false si el número ya pertenece a otro probador
                 } else {
                     if (id == 0) {
-                        // Crear nuevo probador (inicioMillis es null por defecto)
+                        // Creación de registro nuevo
                         val nuevoProbador = Probador(numero = numero, ubicacion = ubicacion)
                         probadorDao.insertProbador(nuevoProbador)
                     } else {
-                        // Actualizar existente preservando su inicioMillis activo
+                        // Actualización de registro existente preservando la marca de tiempo activa (inicioMillis)
                         val existente = probadorDao.getProbadorById(id)
                         val probadorActualizado = existente?.copy(
                             numero = numero,
@@ -45,21 +48,21 @@ class ProbadorViewModel(application: Application) : AndroidViewModel(application
                         ) ?: Probador(id = id, numero = numero, ubicacion = ubicacion)
                         probadorDao.updateProbador(probadorActualizado)
                     }
-                    true
+                    true // Operación exitosa
                 }
             }
-            onResult(guardado)
+            onResult(guardado) // Notifica el resultado a la UI en el hilo principal
         }
     }
 
-    // DELETE
+    // Elimina el registro del probador en segundo plano
     fun deleteProbador(probador: Probador) {
         viewModelScope.launch(Dispatchers.IO) {
             probadorDao.deleteProbador(probador)
         }
     }
 
-    // Cambia el estado: si está libre guarda System.currentTimeMillis(), si está ocupado/excedido lo vuelve null
+    // Alterna el temporizador de uso: asigna el tiempo actual en milisegundos si pasa a ocupado, o null si pasa a libre
     fun toggleEstadoProbador(probador: Probador) {
         viewModelScope.launch(Dispatchers.IO) {
             val nuevoInicio = if (probador.inicioMillis == null) System.currentTimeMillis() else null
@@ -68,11 +71,12 @@ class ProbadorViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    // Alterna la disponibilidad operativa del probador (En Servicio / Fuera de Servicio) y reinicia el temporizador
     fun toggleEnServicio(probador: Probador) {
         viewModelScope.launch(Dispatchers.IO) {
             val actualizado = probador.copy(
                 enServicio = !probador.enServicio,
-                inicioMillis = null // Al sacar de servicio se libera el temporizador si estaba ocupado
+                inicioMillis = null // Si estaba ocupado, detiene y limpia el temporizador
             )
             probadorDao.updateProbador(actualizado)
         }

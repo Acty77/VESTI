@@ -1,6 +1,5 @@
-package com.yoshua.vesti.view.ui // Ubicación dentro de las vistas de la aplicación
+package com.yoshua.vesti.view.ui
 
-// Importaciones de Compose para animaciones, layouts, campos de texto y validaciones
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,38 +39,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-// Importación del modificador animado personalizado y del ViewModel de autenticación
 import com.yoshua.vesti.view.utils.pulsoYRotacion
 import com.yoshua.vesti.viewmodels.LoginViewModel
 
-/**
- * Vista de inicio de sesión con validaciones en tiempo real, encriptación/ocultamiento de clave y animaciones.
- */
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
-    // Escucha de forma reactiva el estado unificado de UI expuesto por el LoginViewModel
+
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    // Copias locales de las variables de error para garantizar Smart Casts nulos seguros en Kotlin
     val emailError = state.emailError
     val passwordError = state.passwordError
 
-    // Efecto secundario: Monitorea si el usuario se ha autenticado con éxito para desencadenar la navegación a Home
+
     LaunchedEffect(state.loggedUser) {
         if (state.loggedUser != null) onLoginSuccess()
     }
 
-    // Estructura vertical centrada para el formulario de acceso
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Logo: Contenedor circular con el icono Checkroom
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(112.dp)
-                // Modificador personalizado que aplica una animación de pulso y rotación al logo
                 .pulsoYRotacion()
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
         ) {

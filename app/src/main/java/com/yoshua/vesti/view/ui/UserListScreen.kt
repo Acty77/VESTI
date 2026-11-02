@@ -14,19 +14,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import com.yoshua.vesti.repository.models.User
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
+
 
 @Composable
 fun UserListScreen(
     viewModel: UserViewModel,
     tipoUsuarioViewModel: TipoUsuarioViewModel,
-    currentUserId: Int?,
-    isAdmin: Boolean, // <-- Nuevo parámetro de rol
+    currentUserId: Int?, // ID del usuario autenticado en la sesión actual
+    isAdmin: Boolean, // Flag del rol Administrador
     onAdd: () -> Unit,
     onEdit: (Int) -> Unit
 ) {
+    // Recolecta en tiempo real la lista de usuarios mediante StateFlow
     val users by viewModel.users.collectAsStateWithLifecycle()
     var toDelete by remember { mutableStateOf<User?>(null) }
 
@@ -51,12 +54,12 @@ fun UserListScreen(
                                 Text(user.email, style = MaterialTheme.typography.bodyMedium)
                             }
 
-                            // SOLO EL ADMIN PUEDE EDITAR Y ELIMINAR
+                            // APLICACIÓN DE REGLA RBAC: Solo el Admin visualiza acciones de edición/eliminación
                             if (isAdmin) {
                                 IconButton(onClick = { onEdit(user.id) }) {
                                     Icon(Icons.Outlined.Edit, contentDescription = "Editar")
                                 }
-                                // Evitar que el Admin se elimine a sí mismo
+                                // REGLA DE SEGURIDAD: Impide que el Administrador borre su propia cuenta en uso
                                 if (user.id != currentUserId) {
                                     IconButton(onClick = { toDelete = user }) {
                                         Icon(
@@ -73,7 +76,7 @@ fun UserListScreen(
             }
         }
 
-        // SOLO EL ADMIN VE EL BOTÓN FLOTANTE (+) PARA AGREGAR
+        // APLICACIÓN DE REGLA RBAC: Solo el Admin visualiza el botón flotante para crear usuarios
         if (isAdmin) {
             FloatingActionButton(
                 onClick = onAdd,
@@ -84,6 +87,7 @@ fun UserListScreen(
         }
     }
 
+    // Modal de confirmación para eliminar usuario
     toDelete?.let { user ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
@@ -91,7 +95,7 @@ fun UserListScreen(
             text = { Text("¿Deseas eliminar al usuario ${user.name}?") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteUser(user)
+                    viewModel.deleteUser(user) // Petición de eliminación enviada a la BD
                     toDelete = null
                 }) { Text("Eliminar") }
             },

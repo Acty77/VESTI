@@ -15,25 +15,27 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userDao = AppDatabase.getDatabase(application).userDao()
 
-    // READ
+    // Lista de usuarios reactiva observada desde la interfaz de usuario
     val users: StateFlow<List<User>> = userDao.getAllUsers()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Mensajes de error para la vista (ej: email duplicado)
+    // Flujo mutable para enviar notificaciones de error a la UI
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
 
     fun clearMessage() { _message.value = null }
 
+    // Búsqueda de usuario por ID en hilo I/O
     suspend fun getUser(id: Int): User? = withContext(Dispatchers.IO) {
         userDao.getUserById(id)
     }
 
-    // CREATE / UPDATE. onSuccess se ejecuta en el hilo principal.
+    // Guarda o actualiza un usuario aplicando reglas de formato y validación de correo único
     fun saveUser(
         id: Int,
         name: String,
@@ -43,7 +45,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         tipoUsuarioId: Int,
         onSuccess: () -> Unit
     ) {
-        // Validación: User.name solo admite letras (mayúsculas/minúsculas) y espacios entre palabras
+        // Valida que el nombre contenga únicamente caracteres alfabéticos
         if (!Validaciones.esSoloLetras(name)) {
             _message.value = "El nombre solo puede contener letras y un espacio entre palabras (sin números ni símbolos)"
             return
@@ -54,14 +56,15 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     val user = User(id = id, name = name, email = email, password = password, profileImageUri = imageUri, tipoUsuarioId = tipoUsuarioId)
                     if (id == 0) userDao.insertUser(user) else userDao.updateUser(user)
                 }
-                onSuccess()
+                onSuccess() // Ejecuta la navegación de regreso tras completar el guardado
             } catch (e: SQLiteConstraintException) {
+                // Atrapa el error si la base de datos detecta un correo duplicado
                 _message.value = "Ya existe un usuario con el email $email"
             }
         }
     }
 
-    // DELETE
+    // Borra un usuario en segundo plano
     fun deleteUser(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
             userDao.deleteUser(user)

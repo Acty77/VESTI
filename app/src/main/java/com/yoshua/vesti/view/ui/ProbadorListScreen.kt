@@ -1,6 +1,5 @@
 package com.yoshua.vesti.view.ui
 
-// Importaciones de Compose para renderizado eficiente de listas (LazyColumn), temporizadores y alertas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,9 +39,6 @@ import com.yoshua.vesti.view.utils.ProbadorCard
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import kotlinx.coroutines.delay
 
-/**
- * Listado principal de probadores con temporizador en tiempo real y opciones administrativas según rol.
- */
 @Composable
 fun ProbadorListScreen(
     viewModel: ProbadorViewModel,

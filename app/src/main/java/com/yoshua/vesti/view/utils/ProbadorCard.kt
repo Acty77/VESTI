@@ -43,17 +43,20 @@ import com.yoshua.vesti.view.theme.coloresDeEstado
 
 @Composable
 fun ProbadorCard(
-    numero: Int,
-    estado: EstadoProbador,
-    segundosEnUso: Long,
-    onAccion: () -> Unit,
-    onToggleServicio: () -> Unit, // <-- Nuevo callback para cambiar servicio
+    numero: Int, // Número asignado al probador
+    estado: EstadoProbador, // Estado dinámico (LIBRE, OCUPADO, EXCEDIDO, FUERA_DE_SERVICIO)
+    segundosEnUso: Long, // Tiempo acumulado en segundos de uso
+    onAccion: () -> Unit, // Callback para alternar estado de uso (Iniciar / Marcar Libre)
+    onToggleServicio: () -> Unit, // Callback para alternar fuera de servicio / mantenimiento
     modifier: Modifier = Modifier
 ) {
+    // Obtiene la combinación de colores (fondo y texto) asociada al estado actual
     val colores = coloresDeEstado(estado)
+    // Transición animada para suavizar el cambio de color de la tarjeta al cambiar de estado
     val fondo by animateColorAsState(targetValue = colores.fondo, label = "fondoProbador")
     val texto by animateColorAsState(targetValue = colores.texto, label = "textoProbador")
 
+    // Mapeo del Enum a texto en español para la etiqueta visual
     val etiqueta = when (estado) {
         EstadoProbador.LIBRE -> "Libre"
         EstadoProbador.OCUPADO -> "Ocupado"
@@ -61,6 +64,7 @@ fun ProbadorCard(
         EstadoProbador.FUERA_DE_SERVICIO -> "Fuera de Servicio"
     }
 
+    // Mapeo del Enum al ícono descriptivo correspondiente
     val iconoEstado: ImageVector = when (estado) {
         EstadoProbador.LIBRE -> Icons.Outlined.CheckCircle
         EstadoProbador.OCUPADO -> Icons.Outlined.Timer
@@ -77,7 +81,7 @@ fun ProbadorCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Header: Título + Botón rápido de activación/bloqueo de servicio
+            // Header: Título del probador con formato a 2 dígitos + Botón rápido de mantenimiento
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -89,31 +93,31 @@ fun ProbadorCard(
                 ) {
                     Icon(Icons.Outlined.MeetingRoom, contentDescription = null)
                     Text(
-                        text = "Probador %02d".format(numero),
+                        text = "Probador %02d".format(numero), // Formatea el entero '1' a "01"
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                // Botón rápido para alternar Fuera de Servicio
+                // Botón rápido para alternar el estado "Fuera de Servicio"
                 IconButton(onClick = onToggleServicio) {
                     Icon(
                         imageVector = if (estado == EstadoProbador.FUERA_DE_SERVICIO)
-                            Icons.Outlined.PlayCircleOutline
+                            Icons.Outlined.PlayCircleOutline // Ícono para reactivar
                         else
-                            Icons.Outlined.Block,
+                            Icons.Outlined.Block, // Ícono para bloquear/desactivar
                         contentDescription = "Alternar estado de servicio",
                         tint = texto
                     )
                 }
             }
 
-            // Etiqueta visual de estado
+            // Chip/Etiqueta visual indicadora del estado actual
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier
-                    .background(texto.copy(alpha = 0.12f), RoundedCornerShape(50))
+                    .background(texto.copy(alpha = 0.12f), RoundedCornerShape(50)) // Fondo translúcido
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Icon(iconoEstado, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -124,16 +128,17 @@ fun ProbadorCard(
                 )
             }
 
+            // Muestra el detalle del tiempo o la descripción del estado
             Text(
                 text = when (estado) {
                     EstadoProbador.LIBRE -> "Disponible para usar"
                     EstadoProbador.FUERA_DE_SERVICIO -> "Desactivado por mantenimiento"
-                    else -> "En uso hace ${formatearTiempo(segundosEnUso)}"
+                    else -> "En uso hace ${formatearTiempo(segundosEnUso)}" // Muestra cronómetro formato mm:ss
                 },
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Botón de acción contextual según el estado
+            // Botón de acción contextual según el estado operativo del probador
             if (estado != EstadoProbador.FUERA_DE_SERVICIO) {
                 FilledTonalButton(
                     onClick = onAccion,
@@ -153,13 +158,14 @@ fun ProbadorCard(
     }
 }
 
-/** 725 segundos -> "12:05" */
+/** Función privada que convierte segundos acumulados a formato digital legible "12:05" */
 private fun formatearTiempo(segundos: Long): String {
     val minutos = segundos / 60
     val resto = segundos % 60
     return "%d:%02d".format(minutos, resto)
 }
 
+// Vista previa interactiva de Compose dentro de Android Studio
 @Preview(showBackground = true)
 @Composable
 private fun ProbadorCardPreview() {

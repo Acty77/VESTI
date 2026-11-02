@@ -1,4 +1,5 @@
 package com.yoshua.vesti.view.utils
+
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -52,37 +53,34 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.File
 
-/**
- * Componente reutilizable de cámara (CameraX).
- * - Solicita el permiso CAMERA en tiempo de ejecución.
- * - Muestra la vista previa (Preview + PreviewView).
- * - Captura una foto (ImageCapture) y la guarda en el almacenamiento interno privado:
- *   /data/data/com.example.app/files/fotos/<carpeta>/img_<timestamp>.jpg
- * - Permite cambiar entre cámara trasera y frontal.
- */
+
 @Composable
 fun CameraCapture(
     carpeta: String, // subcarpeta dentro de files/fotos: "productos", "usuarios", "camara"
-    onImageCaptured: (Uri) -> Unit,
-    onClose: () -> Unit,
+    onImageCaptured: (Uri) -> Unit, // Callback devuelto con la ruta Uri de la foto tomada
+    onClose: () -> Unit, // Callback para cerrar la vista de la cámara
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    // Verificación en tiempo real del permiso Manifest.permission.CAMERA
     var hasPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-                PackageManager.PERMISSION_GRANTED
+                    PackageManager.PERMISSION_GRANTED
         )
     }
+    // Lector asíncrono para solicitar el permiso al usuario mediante diálogo del sistema
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted -> hasPermission = granted }
     )
 
+    // Solicita el permiso automáticamente al montar el Composable si aún no fue concedido
     LaunchedEffect(Unit) {
         if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
+    // Renderizado condicional: si tiene permiso muestra la cámara, de lo contrario pide concederlo
     if (hasPermission) {
         CameraPreviewContent(carpeta, onImageCaptured, onClose, modifier)
     } else {
@@ -111,42 +109,51 @@ private fun CameraPreviewContent(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    // Estado para conmutar entre cámara trasera (LENS_FACING_BACK) y frontal (LENS_FACING_FRONT)
     var lensFacing by remember { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
 
+    // Vista clásica Android de PreviewView instanciada de forma eficiente con 'remember'
     val previewView = remember {
         PreviewView(context).apply { scaleType = PreviewView.ScaleType.FILL_CENTER }
     }
+    // Configuración del caso de uso ImageCapture de CameraX enfocado en baja latencia
     val imageCapture = remember {
         ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             .build()
     }
 
-    // Vincula la cámara al ciclo de vida; se vuelve a ejecutar al cambiar de lente.
+    // Vincula la cámara al ciclo de vida; se destruye y vuelve a enlazar si cambia la lente (lensFacing)
     DisposableEffect(lensFacing) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
+            // Configura el renderizado de la superficie sobre el PreviewView
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(previewView.surfaceProvider)
             }
+            // Selector de lente (Frontal/Trasera)
             val selector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
             try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(lifecycleOwner, selector, preview, imageCapture)
+                cameraProvider.unbindAll() // Desvincula sesiones previas de la cámara
+                cameraProvider.bindToLifecycle(lifecycleOwner, selector, preview, imageCapture) // Enlaza a la UI
             } catch (e: Exception) {
                 Toast.makeText(context, "No se pudo iniciar la cámara", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(context))
 
+        // Al salir del contexto o conmutar de lente, libera de forma segura los recursos de hardware
         onDispose {
             if (cameraProviderFuture.isDone) cameraProviderFuture.get().unbindAll()
         }
     }
 
+    // Interfaz gráfica sobrepuesta (PreviewView nativo + botones Compose)
     Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
+        // Encrustamiento del PreviewView nativo dentro de la jerarquía de Jetpack Compose
         AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
+        // Botón superior para cerrar la vista
         IconButton(
             onClick = onClose,
             modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
@@ -154,6 +161,7 @@ private fun CameraPreviewContent(
             Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
         }
 
+        // Barra inferior de controles: Capturar y Alternar Cámara
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -163,6 +171,7 @@ private fun CameraPreviewContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.size(56.dp))
+            // Botón disparador central
             FilledIconButton(
                 onClick = { takePhoto(context, carpeta, imageCapture, onImageCaptured) },
                 modifier = Modifier.size(76.dp),
@@ -172,6 +181,7 @@ private fun CameraPreviewContent(
             ) {
                 Icon(Icons.Default.PhotoCamera, contentDescription = "Capturar", modifier = Modifier.size(36.dp))
             }
+            // Botón conmutador de lente
             IconButton(
                 onClick = {
                     lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK)
@@ -185,23 +195,21 @@ private fun CameraPreviewContent(
     }
 }
 
-/**
- * Guarda la foto en el almacenamiento INTERNO PRIVADO de la app:
- *   /data/data/com.example.app/files/fotos/<carpeta>/img_<timestamp>.jpg
- * - No aparece en la Galería ni en el administrador de archivos.
- * - Otras apps no pueden leerla; no requiere permisos de almacenamiento.
- * - Se elimina al desinstalar la app y está excluida del respaldo (backup_rules.xml y data_extraction_rules.xml).
- */
+
 private fun takePhoto(context: Context, carpeta: String, imageCapture: ImageCapture, onImageCaptured: (Uri) -> Unit) {
+    // Crea el directorio interno 'files/fotos/<carpeta>'
     val dir = File(context.filesDir, "fotos/$carpeta").apply { mkdirs() }
+    // Genera el archivo JPG con un timestamp único en milisegundos
     val outputFile = File(dir, "img_${System.currentTimeMillis()}.jpg")
     val outputOptions = ImageCapture.OutputFileOptions.Builder(outputFile).build()
 
+    // Ejecuta la toma de la fotografía de forma asíncrona
     imageCapture.takePicture(
         outputOptions,
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                // Notifica el éxito retornando la Uri del archivo generado
                 onImageCaptured(Uri.fromFile(outputFile))
             }
 
