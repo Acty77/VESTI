@@ -1,5 +1,6 @@
 package com.yoshua.vesti.view.ui
 
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,6 +59,7 @@ fun ProbadorFormScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .imePadding()
                 .verticalScroll(rememberScrollState()) // Permite desplazar la pantalla si el teclado cubre los campos
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

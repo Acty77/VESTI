@@ -8,16 +8,18 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yoshua.vesti.repository.models.Probador
 import com.yoshua.vesti.repository.models.TipoUsuario
 import com.yoshua.vesti.repository.models.User
+import com.yoshua.vesti.repository.models.PrendaPerdida
 
 @Database(
-    entities = [Probador::class, User::class, TipoUsuario::class],
-    version = 9, // v2: se agrega tipo_usuarios y FK en users
+    entities = [Probador::class, User::class, TipoUsuario::class, PrendaPerdida::class],
+    version = 10, // v2: se agrega tipo_usuarios y FK en users
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun probadorDao(): ProbadorDao
     abstract fun userDao(): UserDao
     abstract fun tipoUsuarioDao(): TipoUsuarioDao
+    abstract fun prendaPerdidaDao(): PrendaPerdidaDao
 
     companion object {
         @Volatile

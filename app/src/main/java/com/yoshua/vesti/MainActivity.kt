@@ -11,6 +11,7 @@ import com.yoshua.vesti.viewmodels.LoginViewModel
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
+import com.yoshua.vesti.viewmodels.PrendaPerdidaViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
     private val probadorViewModel: ProbadorViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private val tipoUsuarioViewModel: TipoUsuarioViewModel by viewModels()
+    private val prendaPerdidaViewModel: PrendaPerdidaViewModel by viewModels()
 
     // Método de ciclo de vida invocado cuando Android crea la Activity
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
             // Aplica el tema global personalizado (colores, tipografía y formas de la app)
             AppTheme {
                 // Inicia la estructura de navegación e inyecta las instancias compartidas de los ViewModels
-                AppNavigation(loginViewModel, probadorViewModel, userViewModel, tipoUsuarioViewModel)
+                AppNavigation(loginViewModel, probadorViewModel, userViewModel, tipoUsuarioViewModel, prendaPerdidaViewModel)
             }
         }
     }

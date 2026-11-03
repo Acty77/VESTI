@@ -1,5 +1,6 @@
 package com.yoshua.vesti.navegations
 
+// Importaciones para diseño en Compose, íconos y menú desplegable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.DoorFront
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.People
@@ -39,17 +41,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+// Importaciones de las pantallas visuales (UI)
 import com.yoshua.vesti.view.ui.HomeScreen
 import com.yoshua.vesti.view.ui.LoginScreen
+import com.yoshua.vesti.view.ui.PrendaPerdidaScreen
 import com.yoshua.vesti.view.ui.ProbadorFormScreen
 import com.yoshua.vesti.view.ui.ProbadorListScreen
 import com.yoshua.vesti.view.ui.UserFormScreen
 import com.yoshua.vesti.view.ui.UserListScreen
+// Importación de transiciones animadas entre pantallas
 import com.yoshua.vesti.view.utils.navEnterTransition
 import com.yoshua.vesti.view.utils.navExitTransition
 import com.yoshua.vesti.view.utils.navPopEnterTransition
 import com.yoshua.vesti.view.utils.navPopExitTransition
+// Importación de ViewModels
 import com.yoshua.vesti.viewmodels.LoginViewModel
+import com.yoshua.vesti.viewmodels.PrendaPerdidaViewModel
 import com.yoshua.vesti.viewmodels.ProbadorViewModel
 import com.yoshua.vesti.viewmodels.TipoUsuarioViewModel
 import com.yoshua.vesti.viewmodels.UserViewModel
@@ -64,6 +71,7 @@ object Routes {
     const val PROBADOR_FORM = "probador_form?id={id}"
     const val USERS = "users"
     const val USER_FORM = "user_form?id={id}"
+    const val PRENDAS_PERDIDAS = "prendas_perdidas"
 
     fun probadorForm(id: Int = 0) = "probador_form?id=$id"
     fun userForm(id: Int = 0) = "user_form?id=$id"
@@ -77,7 +85,8 @@ data class MenuItem(val route: String, val label: String, val icon: ImageVector)
 val menuItems = listOf(
     MenuItem(Routes.HOME, "Inicio", Icons.Outlined.Home), // Opción Inicio
     MenuItem(Routes.PROBADORES, "Probadores", Icons.Outlined.DoorFront), // Opción Probadores
-    MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People) // Opción Usuarios (Restringida para Vendedor)
+    MenuItem(Routes.USERS, "Usuarios", Icons.Outlined.People), // Opción Usuarios (Restringida para Vendedor)
+    MenuItem(Routes.PRENDAS_PERDIDAS, "Prendas Perdidas", Icons.Outlined.Checkroom) // Opción Prendas Perdidas (Ícono de perchero)
 )
 
 // Función privada pura que mapea la ruta actual a un título legible para mostrar en la barra superior (TopAppBar)
@@ -87,6 +96,7 @@ private fun titleFor(route: String?): String = when (route) {
     Routes.PROBADOR_FORM -> "Probador"
     Routes.USERS -> "Usuarios"
     Routes.USER_FORM -> "Usuario"
+    Routes.PRENDAS_PERDIDAS -> "Prendas Perdidas"
     else -> "" // Si es Login o ruta desconocida, no muestra título
 }
 
@@ -96,7 +106,8 @@ fun AppNavigation(
     loginViewModel: LoginViewModel, // Inyección del ViewModel de Login para controlar el estado del usuario y la sesión
     probadorViewModel: ProbadorViewModel, // ViewModel para los probadores
     userViewModel: UserViewModel, // ViewModel para la gestión de usuarios
-    tipoUsuarioViewModel: TipoUsuarioViewModel // ViewModel para los roles de usuario
+    tipoUsuarioViewModel: TipoUsuarioViewModel, // ViewModel para los roles de usuario
+    prendaPerdidaViewModel: PrendaPerdidaViewModel // ViewModel para el registro de prendas perdidas
 ) {
     val navController = rememberNavController() // Mantiene y sobrevive el estado de la pila de navegación de Android
     val drawerState = rememberDrawerState(DrawerValue.Closed) // Guarda el estado del menú lateral (abierto o cerrado)
@@ -214,6 +225,7 @@ fun AppNavigation(
                 probadorViewModel = probadorViewModel,
                 userViewModel = userViewModel,
                 tipoUsuarioViewModel = tipoUsuarioViewModel,
+                prendaPerdidaViewModel = prendaPerdidaViewModel, // <-- Pasa el ViewModel a AppNavHost
                 currentUserId = loginState.loggedUser?.id, // ID del usuario logueado
                 currentUserName = loginState.loggedUser?.name ?: "", // Nombre del usuario logueado
                 isAdmin = isAdmin, // <-- Se pasa la propiedad de Admin para aplicar restricciones en las pantallas
@@ -232,6 +244,7 @@ private fun AppNavHost(
     probadorViewModel: ProbadorViewModel,
     userViewModel: UserViewModel,
     tipoUsuarioViewModel: TipoUsuarioViewModel,
+    prendaPerdidaViewModel: PrendaPerdidaViewModel, // <-- Recibe PrendaPerdidaViewModel
     currentUserId: Int?,
     currentUserName: String,
     isAdmin: Boolean, // <-- Recibe el flag de Admin
@@ -301,6 +314,16 @@ private fun AppNavHost(
                 tipoUsuarioViewModel = tipoUsuarioViewModel,
                 userId = entry.arguments?.getInt("id") ?: 0, // Extrae el id o usa 0
                 onDone = { navController.popBackStack() } // Vuelve al listado de usuarios al terminar
+            )
+        }
+        // Registro de la ruta del Registro de Prendas Perdidas
+        composable(Routes.PRENDAS_PERDIDAS) {
+            PrendaPerdidaScreen(
+                onGuardar = { num, desc, foto ->
+                    prendaPerdidaViewModel.guardarPrenda(num, desc, foto) {
+                        navController.popBackStack() // Vuelve a la pantalla anterior tras guardar con éxito en la BD
+                    }
+                }
             )
         }
     }
